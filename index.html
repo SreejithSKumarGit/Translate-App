@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Just Translate</title>
     <style>
+    body
+    {
+        background-image: url("https://png.pngtree.com/background/20210710/original/pngtree-business-geometric-contrast-advertising-background-picture-image_1048146.jpg");
+    }
     #container
     {
         display: grid;
@@ -18,11 +22,11 @@
     }
     textarea
     {
-        width: 90%;
-        height: 300px;
+        width: 80%;
+        height: 250px;
         font-weight: bold;
         font-size: 20px;  
-    
+        opacity:65%;
     }
     
     #translateBtn
@@ -33,20 +37,45 @@
        margin: auto;
        font-weight: bold;
        font-size: 20px;
-       background-color: aqua;
+       background-color: rgb(13, 13, 161);
        border-radius: 5px;
+       color: beige;
     }
     #navBar
     {
         width: 100%;
-        height: 50px;
+        height: 80px;
         text-align: center;
         font-style: italic;
-        color: blueviolet;
+        color: orangered;
+        font-size: 25px;
         border-radius: 7px;
-        margin: 5px;
-        background-color: rgb(177, 226, 43);
-
+        margin-bottom: 15px;
+    }
+    #inputSection > select
+    {
+        width: 40%;
+        font-size: 18px;
+        opacity: 70%;
+    }
+    #inputSection > label
+    {
+        font-size: 20px;
+        font-weight: bold;
+        color: beige;
+    }
+    
+    #outputSection > select
+    {
+        width: 40%;
+        font-size: 18px;
+        opacity: 70%;
+    }
+    #outputSection > label
+    {
+        font-size: 20px;
+        font-weight: bold;
+        color: beige;
     }
 
     </style>
@@ -56,28 +85,76 @@
       <h1>Just Translate !!!!</h1>
   </div>
   <div id="container">
+      
     <div id="inputSection">
+        <label for="inputLanguage">From :</label>
+        <select name="inputLanguage" id="inputLanguage">
+          
+        </select>
     <textarea name="inputText" id="inputText" cols="30" rows="10" placeholder="Enter text to translate"></textarea>
-    
     </div>
     <div id="outputSection">
+        <label for="outputLanguage"> To : </label>
+        <select name="outputLanguage" id="outputLanguage">
+        </select>
         <textarea name="outputText" id="outputText" cols="30" rows="10" placeholder="Translated text"></textarea>
     </div>
   </div>
+  
   <button id="translateBtn" onclick="translateText()">Translate</button>
   <script>
+      populateSelectBtn();
       
+      async function populateSelectBtn()
+      {
+          
+          if(localStorage.getItem('selectKey')==null)
+          {
+              let selectKey= await fetchSelectValues();
+              console.log(selectKey)
+              localStorage.setItem('selectKey',JSON.stringify(selectKey));
+          }
+          let selectKey=JSON.parse(localStorage.getItem('selectKey'));
+          selectKey.forEach(element => {
+              let inputLanguage=document.getElementById("inputLanguage");
+              let outputLanguage=document.getElementById("outputLanguage");
+              let inputOption=document.createElement('option');
+              inputOption.textContent=element.name;
+              inputOption.value=element.code;
+              let outputOption=document.createElement('option');
+              outputOption.textContent=element.name;
+              outputOption.value=element.code;
+              inputLanguage.append(inputOption);
+              outputLanguage.append(outputOption);
+          });
+      }
+      async function fetchSelectValues()
+      {
+          try 
+          {
+              let res=await fetch(`https://libretranslate.de/languages`);
+              let data=await res.json();
+              return data;
+
+          } 
+          catch (error)
+          {
+             console.log("Errro : "+ error); 
+          }
+      }
       async function translateText()
       {
         try {
+            let inputOption=document.getElementById("inputLanguage").value;
+            let outputOption=document.getElementById("outputLanguage").value;
             let inputText=document.getElementById("inputText").value;
             const res = await fetch(`https://libretranslate.de/translate`, {
 	        method: "POST",
 	        body: JSON.stringify
             ({
 		    q: inputText,
-		    source: "en",
-		    target: "hi",
+		    source: inputOption ,
+		    target: outputOption ,
 		    format: "text"
 	        }),
 	        headers: { "Content-Type": "application/json" }
